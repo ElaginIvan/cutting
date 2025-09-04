@@ -1,0 +1,154 @@
+/* --- Стили для страницы настроек --- */
+
+.accordion {
+    width: 100%;
+}
+
+/* Основная карточка-контейнер для всего аккордеона */
+.settings-card {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    /* Обязательно для скругления углов */
+}
+
+/* Заголовок секции аккордеона */
+.accordion-header {
+    background-color: var(--surface-color);
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.accordion-header:last-of-type {
+    /* Убираем нижнюю рамку у последнего заголовка, если он закрыт */
+    border-bottom: none;
+}
+
+.accordion-header.active:last-of-type {
+    /* Возвращаем рамку, когда он открыт */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-header:hover {
+    background-color: var(--surface-color);
+    /* Более заметное выделение при наведении */
+}
+
+/* Иконка-стрелка */
+.accordion-header::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--text-color);
+    transition: transform 0.3s ease;
+}
+
+.accordion-header.active::after {
+    content: '−';
+    transform: rotate(180deg);
+}
+
+/* Контентная часть аккордеона */
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: var(--surface-color);
+    padding: 0 0.5rem;
+    /* Горизонтальные отступы для контента */
+    
+}
+
+/* --- Стили для элементов управления в списке --- */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--text-muted-color);
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.btn-edit-assortment {
+    font-size: 1.2rem;
+    /* Делаем иконку редактирования чуть меньше */
+    font-weight: bold;
+}
+
+/* --- Стили для кнопок формы --- */
+
+.form-actions {
+    display: flex;
+    gap: 0.5rem;
+    /* Расстояние между кнопками */
+    align-items: center;
+}
+
+/* Улучшаем читаемость текста в списке сортамента */
+.list-item .item-info strong {
+    color: var(--text-color);
+}
+
+.list-item .item-info span {
+    color: var(--text-color);
+}
+
+/* Добавляем отступ для формы с верху внутри аккордиона */
+.form-card {
+    margin-top: 0.5rem;
+}
+
+/* --- Стили для инструкции --- */
+.instructions-container {
+    padding: 0.5rem 1rem 1rem 1rem;
+    /* top right bottom left */
+    line-height: 1.6;
+}
+
+.instructions-container h3 {
+    color: var(--primary-color);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.25rem;
+}
+
+.instructions-container h4 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.instructions-container ul {
+    list-style-position: inside;
+    padding-left: 1rem;
+}
+
+.instructions-container li {
+    margin-bottom: 0.5rem;
+}
+
+.instruction-image {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin: 1rem auto;
+    display: block;
+}
+
+.instructions-container .nested-list {
+    list-style-type: circle;
+    margin-top: 0.5rem;
+    margin-left: 1.5rem;
+}
