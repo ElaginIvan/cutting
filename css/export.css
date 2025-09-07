@@ -1,0 +1,159 @@
+/* --- Стили для контента, который будет экспортирован в PDF --- */
+
+/* Общий контейнер, который мы рендерим. Он не виден пользователю. */
+#export-container {
+    font-family: 'Inter', sans-serif;
+    color: #000;
+    background-color: #fff;
+}
+
+/* Эмуляция страницы A4 */
+.export-page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    box-sizing: border-box;
+    background-color: #fff;
+    position: relative; /* Необходимо для позиционирования номера страницы */
+    page-break-after: always; /* Разрыв страницы после каждого такого блока */
+}
+
+/* Размеры для альбомной ориентации */
+.export-page.landscape {
+    width: 297mm;
+    min-height: 210mm;
+}
+
+.export-page:last-child {
+    page-break-after: avoid;
+}
+
+/* Заголовки */
+.export-page h1 {
+    font-size: 24px;
+    color: #333;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.export-page h2 {
+    font-size: 18px;
+    color: #4a90e2;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* Подзаголовок для указания материала, если группа переносится на новую страницу */
+.export-page-subtitle {
+    font-size: 16px;
+    color: #666;
+    font-style: italic;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.export-page h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+/* Визуализация хлыста */
+.export-bar-visualization {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+.export-cut-piece,
+.export-remnant-piece {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+}
+
+.export-cut-piece { background-color: #c8e6c9; border-right: 1px solid #999; }
+.export-remnant-piece { background-color: #ffecb3; }
+.export-bar-summary { font-size: 12px; color: #555; text-align: right; margin-top: 5px; }
+
+/* Стили для списка спецификации деталей */
+.export-details-list {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.export-details-list h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 5px 0;
+}
+
+.export-details-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #444;
+}
+
+.export-details-list li {
+    padding: 2px 0;
+}
+
+/* Стили для блока с неразмещенными деталями и дефицитом */
+.export-summary-block {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 2px solid #ccc;
+}
+
+.export-summary-block h3 {
+    font-size: 16px;
+    color: #e53935; /* Красный для привлечения внимания */
+    margin-top: 0;
+}
+
+.export-summary-block ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    color: #333;
+}
+
+.export-summary-block li {
+    padding: 3px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Стили для номера страницы, который теперь является частью HTML */
+.export-page-number {
+    position: absolute;
+    bottom: 10mm; /* Отступ от нижнего края страницы */
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 10px;
+    color: #888;
+}

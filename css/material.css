@@ -1,0 +1,16 @@
+/* Стили, специфичные для вкладки "Материал" */
+
+.list-item.remnant {
+    border-left-color: #f5a623;
+    /* Оранжевый для остатков */
+}
+
+.item-actions .btn-delete-material:hover {
+    color: #e53935;
+}
+
+.btn-edit-material {
+    font-size: 1.2rem;
+    /* Делаем иконку редактирования чуть меньше */
+    font-weight: bold;
+}

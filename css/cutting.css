@@ -1,0 +1,286 @@
+/* --- Стили для страницы Раскроя --- */
+
+.cutting-plan-card {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cutting-plan-header {
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+    gap: 10px;
+    /* Расстояние между заголовком и кнопками */
+}
+
+.cutting-plan-header .material-type {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.stock-bar-visualization {
+    background-color: var(--bg-color);
+    border-radius: 4px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid #555;
+}
+
+.cut-piece,
+.kerf-piece,
+.remnant-piece {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    /* Контейнер должен обрезать все, что выходит за его пределы */
+    overflow: hidden;
+}
+
+/* Новый класс для самого текста внутри отрезка, чтобы лучше контролировать переполнение */
+.piece-label {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+    /* Небольшие отступы, чтобы текст не прилипал к краям */
+    padding: 0 2px;
+    
+}
+
+.cut-piece,
+.unplaced-parts-list li {
+    cursor: pointer;
+    /* Указывает, что элементы кликабельны */
+    transition: transform 0.1s ease-out, box-shadow 0.2s, background-color 0.2s;
+}
+
+.cut-piece {
+    background-color: var(--success-color);
+    /* Зеленый для деталей. Добавляем рамку для визуального разделения всех деталей. */
+    border-right: 1px solid #333; /* Имитация реза справа от детали */
+}
+
+.cut-piece:nth-child(odd) {
+    background-color: #5cb85c;
+    /* Чередуем цвета для наглядности */
+}
+
+.cut-piece.grouped {
+    /* Добавляем полоски для сгруппированных деталей, чтобы визуально отличать их */
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, transparent 75%, transparent);
+    background-size: 20px 20px;
+}
+
+.remnant-piece {
+    background-color: var(--warning-color);
+    /* Оранжевый для остатка */
+}
+
+.bar-summary {
+    font-size: 14px;
+    color: var(--text-muted-color);
+    text-align: right;
+}
+
+.bar-container {
+    border: 2px solid transparent;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    transition: border-color 0.2s, background-color 0.2s;
+    cursor: pointer;
+}
+
+.bar-details-list {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding-top 0.3s ease-out;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 4px 4px;
+}
+
+.bar-details-list.visible {
+    max-height: 200px; /* Максимальная высота, чтобы избежать слишком длинных списков */
+    overflow-y: auto;
+    padding-top: 10px;
+}
+
+.bar-details-list ul {
+    list-style-type: none;
+    padding: 0 10px 10px 10px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted-color);
+}
+
+
+.bar-container.selected-for-add {
+    border-color: var(--primary-color);
+    background-color: rgba(74, 144, 226, 0.1);
+}
+
+.unplaced-parts-list li {
+    background-color: rgba(229, 57, 53, 0.1);
+    border-left: 3px solid var(--danger-color);
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    list-style-type: none;
+
+}
+
+.unplaced-parts-list li:hover {
+    background-color: rgba(229, 57, 53, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.bar-header h5 {
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Стили для блока с информацией о дефиците в карточке раскроя */
+.deficit-info-block {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(240, 173, 78, 0.1); /* Легкий фон */
+    border: 1px solid var(--warning-color); /* Оранжевая рамка */
+    border-radius: 6px;
+    color: var(--warning-color); /* Оранжевый текст */
+    
+}
+
+.deficit-info-block ul {
+    padding-left: 20px; /* Отступ для маркеров списка */
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+/* Контейнер для основных кнопок на вкладке Раскрой */
+.cutting-main-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Стиль для подсветки детали при клике на спецификацию */
+.cut-piece.highlight {
+    position: relative; /* Необходимо для z-index */
+    animation: highlight-animation 1.5s ease-out;
+}
+
+@keyframes highlight-animation {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(74, 144, 226, 0);
+        z-index: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px 5px rgba(74, 144, 226, 0.7);
+        background-color: var(--primary-color); /* Яркий цвет подсветки */
+        z-index: 10; /* Выносим на передний план */
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(74, 144, 226, 0);
+        z-index: 1;
+    }
+}
+
+/* Стиль для подсветки хлыстов, в которые может поместиться выбранная деталь */
+.bar-container.highlight-potential-fit {
+    border-color: var(--success-color); /* Зеленая рамка */
+    background-color: rgba(76, 175, 80, 0.1); /* Легкий зеленый фон, можно оставить или тоже сделать переменной */
+    box-shadow: 0 0 8px hsla(122, 39%, 49%, 0.5);
+}
+
+/* Новый внутренний контейнер для прокрутки в лупе */
+.magnifier-content {
+    cursor: grab;
+    display: inline-block; /* Позволяет контейнеру быть таким же широким, как его содержимое */
+    min-width: 100%;
+}
+
+.magnifier-content.grabbing {
+    cursor: grabbing;
+}
+
+/* Скрываем стандартный скроллбар в лупе */
+.magnifier-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* --- Стили для "лупы" --- */
+.magnifier-container {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 760px;
+    background-color: var(--surface-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    z-index: 1500;
+    pointer-events: none; /* Лупа не должна перехватывать клики */
+    animation: magnifier-fade-in 0.2s ease-out;
+    overflow-x: auto; /* Включаем горизонтальную прокрутку */
+    -ms-overflow-style: none;  /* IE и Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.magnifier-container.top {
+    top: 15px;
+}
+
+.magnifier-container.bottom {
+    bottom: 15px;
+}
+
+.magnifier-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+@keyframes magnifier-fade-in {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
