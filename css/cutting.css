@@ -11,19 +11,41 @@
 
 .cutting-plan-header {
     font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
+    cursor: pointer;
     gap: 10px;
     /* Расстояние между заголовком и кнопками */
+}
+
+.cutting-plan-header.active {
+    border-bottom: 1px solid var(--border-color);
 }
 
 .cutting-plan-header .material-type {
     color: var(--primary-color);
     font-size: 1.1rem;
+}
+
+.cutting-plan-header .kpi-display {
+    font-size: 0.9rem;
+    font-weight: normal;
+    color: var(--text-muted-color);
+    margin-left: 10px;
+}
+
+.cutting-plan-header::after {
+    content: '−';
+    font-size: 1.5rem;
+    font-weight: 300;
+    transition: transform 0.3s ease;
+    margin-left: auto; /* Прижимаем к правому краю перед кнопками */
+    padding: 0 10px;
+}
+
+.cutting-plan-header:not(.active)::after {
+    content: '+';
 }
 
 .stock-bar-visualization {
@@ -283,4 +305,19 @@
         opacity: 1;
         transform: translateX(-50%) scale(1);
     }
+}
+
+.cutting-plan-content {
+    display: block;
+    padding-top: 10px;
+}
+
+/* Стили для панели с основной кнопкой (Редактировать) */
+.cutting-main-card-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center; /* Добавляем выравнивание по центру */
+    padding-bottom: 10px; /* Убираем верхний паддинг, оставляем нижний */
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
 }

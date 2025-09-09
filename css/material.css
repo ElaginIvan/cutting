@@ -1,5 +1,54 @@
 /* Стили, специфичные для вкладки "Материал" */
 
+/* Стили для группировки материалов в аккордеон */
+.material-group {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background-color: var(--surface-color);
+}
+
+.material-group-header {
+    background-color: var(--surface-color);
+    padding: 10px 1rem;
+    /* Уменьшаем вертикальные отступы */
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+    font-weight: 600;
+}
+
+.material-group-header.active {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.material-group-header::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 300;
+    transition: transform 0.3s ease;
+}
+
+.material-group-header.active::after {
+    content: '−';
+}
+
+.material-group-content {
+    display: none;
+    padding: 0.5rem 0.5rem 0 0.5rem;
+    background-color: var(--surface-color);
+}
+
+.material-sub-group h4 {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: var(--text-muted-color);
+}
+
 .list-item.remnant {
     border-left-color: #f5a623;
     /* Оранжевый для остатков */

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Элементы DOM ---
+    const formTemplateContainer = document.getElementById('form-templates');
     const form = document.getElementById('add-part-form');
     const categorySelect = document.getElementById('part-material-category');
     const assortmentFields = form.querySelector('.assortment-fields');
@@ -7,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lengthInput = document.getElementById('part-length');
     const quantityInput = document.getElementById('part-quantity');
     const submitButton = form.querySelector('button[type="submit"]');
+    const addPartBtn = document.getElementById('add-part-btn');
     const partListContainer = document.getElementById('parts-list-container');
     const clearPartsBtn = document.getElementById('clear-parts-btn');
     const cancelButton = document.getElementById('part-cancel-edit-btn');
@@ -82,29 +84,57 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        parts.forEach(part => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'list-item';
-            const infoText = !isSimpleMode
-                ? `${part.category} ${part.type}<br>`
-                : '';
+        // 1. Группируем заготовки
+        const groupedParts = parts.reduce((acc, part) => {
+            const key = `${part.category}|${part.type}`;
+            if (!acc[key]) {
+                acc[key] = [];
+            }
+            acc[key].push(part);
+            return acc;
+        }, {});
 
-            itemDiv.dataset.id = part.id;
-            itemDiv.innerHTML = `
-                <div class="item-info">
-                    ${infoText}
-                    ${part.length} мм x ${part.quantity} шт.
-                </div>
-                <div class="item-actions">
-                    <button class="btn-icon btn-edit-part fa-solid fa-pen"></button>
-                    <button class="btn-icon btn-delete-part fa-solid fa-xmark"></button>
-                </div>
-            `;
-            partListContainer.appendChild(itemDiv);
-        });
+        // 2. Отрисовываем группы
+        for (const groupKey in groupedParts) {
+            const [category, type] = groupKey.split('|');
+            const group = groupedParts[groupKey];
+
+            const groupContainer = document.createElement('div');
+            // Переиспользуем стили от группировки материалов
+            groupContainer.className = 'material-group';
+
+            const header = document.createElement('div');
+            header.className = 'material-group-header';
+            header.textContent = isSimpleMode ? 'Заготовки' : `${category} ${type}`;
+
+            const content = document.createElement('div');
+            content.className = 'material-group-content';
+
+            group.forEach(part => content.appendChild(createPartItem(part, isSimpleMode)));
+
+            groupContainer.appendChild(header);
+            groupContainer.appendChild(content);
+            partListContainer.appendChild(groupContainer);
+        }
 
         // Показываем кнопку очистки, если в списке есть элементы
         clearPartsBtn.style.display = 'block';
+    }
+
+    function createPartItem(part, isSimpleMode) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'list-item';
+        itemDiv.dataset.id = part.id;
+        itemDiv.innerHTML = `
+            <div class="item-info">
+                <strong>${part.length} мм</strong> x ${part.quantity} шт.
+            </div>
+            <div class="item-actions">
+                <button class="btn-icon btn-edit-part fa-solid fa-pen"></button>
+                <button class="btn-icon btn-delete-part fa-solid fa-xmark"></button>
+            </div>
+        `;
+        return itemDiv;
     }
 
     /**
@@ -115,15 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
         typeSelect.innerHTML = '<option value="" disabled selected>Выберите типоразмер</option>';
         typeSelect.disabled = true;
         editingPartId = null;
-        submitButton.textContent = 'Добавить заготовку';
-        cancelButton.style.display = 'none';
-        categorySelect.focus();
+        submitButton.textContent = 'Добавить'; // eslint-disable-line
+        FormModal.hide(); // eslint-disable-line
     }
 
     // --- Обработчики событий ---
 
     categorySelect.addEventListener('change', (e) => {
         populateTypes(e.target.value);
+    });
+
+    addPartBtn.addEventListener('click', () => {
+        editingPartId = null;
+        form.reset();
+        submitButton.textContent = 'Добавить';
+        FormModal.show({ title: 'Добавить заготовку', formId: 'add-part-form' }); // eslint-disable-line
     });
 
     cancelButton.addEventListener('click', resetFormState);
@@ -211,15 +247,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Переключаем форму в режим редактирования
                     editingPartId = partId;
                     submitButton.textContent = 'Сохранить';
-                    cancelButton.style.display = 'inline-block';
-
-                    // Плавно прокручиваем контейнер вверх к форме,
-                    // чтобы избежать "подпрыгивания" всей страницы.
-                    const contentSection = form.closest('.content-section');
-                    if (contentSection) {
-                        contentSection.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    FormModal.show({ title: 'Редактировать заготовку', formId: 'add-part-form' }); // eslint-disable-line
                 }
+            }
+        });
+
+        // Обработчик для аккордеона
+        partListContainer.addEventListener('click', (e) => {
+            const header = e.target.closest('.material-group-header');
+            if (header) {
+                header.classList.toggle('active');
+                header.nextElementSibling.style.display = header.classList.contains('active') ? 'block' : 'none';
             }
         });
     }

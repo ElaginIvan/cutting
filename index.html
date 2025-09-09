@@ -50,47 +50,12 @@
 
     <main class="content-wrapper">
         <div id="material" class="content-section active">
-            <h2>Материал</h2>
-            <form id="add-material-form" class="card">
-                <div class="assortment-fields">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="material-category">Сортамент</label>
-                            <select id="material-category" name="category" required>
-                                <option value="" disabled selected>Загрузка...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="material-type">Типоразмер</label>
-                            <select id="material-type" name="type" required>
-                                <option value="" disabled selected>Выберите тип</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="material-length">Длина (мм)</label>
-                        <input type="text" id="material-length" name="materialLength" placeholder="6000" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="material-quantity">Количество</label>
-                        <input type="text" id="material-quantity" name="quantity" value="1" min="1" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group-checkbox">
-                        <input type="checkbox" id="material-is-remnant" name="isRemnant">
-                        <label for="material-is-remnant">Остаток</label>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Добавить на склад</button>
-                    <button type="button" id="material-cancel-edit-btn" class="btn-secondary"
-                        style="display: none;">Отмена</button>
-                </div>
-            </form>
-
+            <div class="section-header">
+                <h2>Материал</h2>
+                <button id="add-material-btn" class="section-header-action" title="Добавить материал">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
             <h3>На складе</h3>
             <div id="material-list-container">
                 <!-- Список материалов будет генерироваться здесь -->
@@ -100,44 +65,15 @@
         <div id="parts" class="content-section">
             <div class="section-header">
                 <h2>Заготовки</h2>
-                <button id="clear-parts-btn" class="section-header-action" title="Очистить список заготовок">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <div class="header-actions">
+                    <button id="clear-parts-btn" class="section-header-action" title="Очистить список заготовок">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <button id="add-part-btn" class="section-header-action" title="Добавить заготовку">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
             </div>
-            <form id="add-part-form" class="card">
-                <div class="assortment-fields">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="part-material-category">Сортамент</label>
-                            <select id="part-material-category" name="category" required>
-                                <option value="" disabled selected>Загрузка...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="part-material-type">Типоразмер</label>
-                            <select id="part-material-type" name="type" required>
-                                <option value="" disabled selected>Выберите тип</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="part-length">Длина (мм)</label>
-                        <input type="text" id="part-length" name="partLength" placeholder="1200" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="part-quantity">Количество</label>
-                        <input type="text" id="part-quantity" name="quantity" value="1" min="1" required>
-                    </div>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Добавить заготовку</button>
-                    <button type="button" id="part-cancel-edit-btn" class="btn-secondary"
-                        style="display: none;">Отмена</button>
-                </div>
-            </form>
-
             <h3>Список заготовок</h3>
             <div id="parts-list-container">
                 <!-- Список заготовок будет генерироваться здесь -->
@@ -318,6 +254,71 @@
             </div>
     </main>
 
+    <!-- Модальное окно для форм -->
+    <div id="form-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="form-modal-title">Заголовок формы</h3>
+                <button id="form-modal-close-btn" class="close-btn">&times;</button>
+            </div>
+            <div id="form-modal-body" class="modal-body">
+                <!-- Форма будет вставлена сюда динамически -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрытый контейнер для хранения шаблонов форм -->
+    <div id="form-templates" style="display: none;">
+        <form id="add-material-form">
+            <div class="assortment-fields">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="material-category">Сортамент</label>
+                        <select id="material-category" name="category" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="material-type">Типоразмер</label>
+                        <select id="material-type" name="type" required></select>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="material-length">Длина (мм)</label>
+                    <input type="text" id="material-length" name="materialLength" placeholder="6000" required>
+                </div>
+                <div class="form-group">
+                    <label for="material-quantity">Количество</label>
+                    <input type="text" id="material-quantity" name="quantity" value="1" min="1" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group-checkbox">
+                    <input type="checkbox" id="material-is-remnant" name="isRemnant">
+                    <label for="material-is-remnant">Остаток</label>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Добавить</button>
+                <button type="button" id="material-cancel-edit-btn" class="btn-secondary">Отмена</button>
+            </div>
+        </form>
+
+        <form id="add-part-form">
+            <div class="assortment-fields">
+                <div class="form-row">
+                    <div class="form-group"><label for="part-material-category">Сортамент</label><select id="part-material-category" name="category" required></select></div>
+                    <div class="form-group"><label for="part-material-type">Типоразмер</label><select id="part-material-type" name="type" required></select></div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label for="part-length">Длина (мм)</label><input type="text" id="part-length" name="partLength" placeholder="1200" required></div>
+                <div class="form-group"><label for="part-quantity">Количество</label><input type="text" id="part-quantity" name="quantity" value="1" min="1" required></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn-primary">Добавить</button><button type="button" id="part-cancel-edit-btn" class="btn-secondary">Отмена</button></div>
+        </form>
+    </div>
+
     <!-- Модальное окно подтверждения -->
     <div id="confirmation-modal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
@@ -345,6 +346,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="/cutting/js/main.js"></script>
     <script src="/cutting/js/database.js"></script>
+    <script src="/cutting/js/form-modal.js"></script>
     <script src="/cutting/js/modal.js"></script>
     <script src="/cutting/js/cutting-state.js"></script>
     <script src="/cutting/js/cutting-history.js"></script>
@@ -362,6 +364,4 @@
     <script src="/cutting/js/export.js"></script>
 </body>
 
-
 </html>
-

@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Элементы DOM ---
+    const formTemplateContainer = document.getElementById('form-templates');
+    // Получаем форму из основного документа, так как она может быть в модальном окне
     const form = document.getElementById('add-material-form');
     const categorySelect = document.getElementById('material-category');
     const typeSelect = document.getElementById('material-type');
@@ -7,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quantityInput = document.getElementById('material-quantity');
     const remnantCheckbox = document.getElementById('material-is-remnant');
     const submitButton = form.querySelector('button[type="submit"]');
+    const addMaterialBtn = document.getElementById('add-material-btn');
     const materialListContainer = document.getElementById('material-list-container');
     const cancelButton = document.getElementById('material-cancel-edit-btn');
 
@@ -53,33 +56,77 @@ document.addEventListener('DOMContentLoaded', () => {
      * Отрисовывает список добавленных материалов
      */
     function renderMaterialList() {
-        const materials = DB.getMaterials();
+        let materials = DB.getMaterials();
         materialListContainer.innerHTML = ''; // Очищаем список
 
         if (materials.length === 0) {
             materialListContainer.innerHTML = '<p class="text-muted">Нет добавленных материалов.</p>';
             return;
         }
-
-        materials.forEach(material => {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'list-item';
-            if (material.isRemnant) {
-                itemDiv.classList.add('remnant');
+        // 1. Группируем материалы
+        const groupedMaterials = materials.reduce((acc, material) => {
+            const key = `${material.category}|${material.type}`;
+            if (!acc[key]) {
+                acc[key] = { stock: [], remnants: [] };
             }
-            itemDiv.dataset.id = material.id;
-            itemDiv.innerHTML = `
+            if (material.isRemnant) {
+                acc[key].remnants.push(material);
+            } else {
+                acc[key].stock.push(material);
+            }
+            return acc;
+        }, {});
+
+        // 2. Отрисовываем группы
+        for (const groupKey in groupedMaterials) {
+            const [category, type] = groupKey.split('|');
+            const group = groupedMaterials[groupKey];
+
+            const groupContainer = document.createElement('div');
+            groupContainer.className = 'material-group';
+
+            const header = document.createElement('div');
+            header.className = 'material-group-header';
+            header.textContent = `${category} ${type}`;
+
+            const content = document.createElement('div');
+            content.className = 'material-group-content';
+
+            // Добавляем хлысты
+            if (group.stock.length > 0) {
+                content.innerHTML += '<h4>Хлысты</h4>';
+                group.stock.forEach(material => content.appendChild(createMaterialItem(material)));
+            }
+
+            // Добавляем остатки
+            if (group.remnants.length > 0) {
+                content.innerHTML += '<h4>Остатки</h4>';
+                group.remnants.forEach(material => content.appendChild(createMaterialItem(material)));
+            }
+
+            groupContainer.appendChild(header);
+            groupContainer.appendChild(content);
+            materialListContainer.appendChild(groupContainer);
+        }
+    }
+
+    function createMaterialItem(material) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'list-item';
+        if (material.isRemnant) {
+            itemDiv.classList.add('remnant');
+        }
+        itemDiv.dataset.id = material.id;
+        itemDiv.innerHTML = `
                 <div class="item-info">
-                    ${material.category} ${material.type}<br>
-                    ${material.length} мм x ${material.quantity} шт.
+                    <strong>${material.length} мм</strong> x ${material.quantity} шт.
                 </div>
                 <div class="item-actions">
                     <button class="btn-icon btn-edit-material fa-solid fa-pen"></button>
                     <button class="btn-icon btn-delete-material fa-solid fa-xmark"></button>
                 </div>
             `;
-            materialListContainer.appendChild(itemDiv);
-        });
+        return itemDiv;
     }
 
     /**
@@ -91,9 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         typeSelect.disabled = true;
         editingMaterialId = null;
         remnantCheckbox.checked = false;
-        submitButton.textContent = 'Добавить на склад';
-        cancelButton.style.display = 'none';
-        categorySelect.focus();
+        submitButton.textContent = 'Добавить';
+        FormModal.hide(); // eslint-disable-line
     }
 
     // --- Обработчики событий ---
@@ -122,9 +168,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         resetFormState();
         renderMaterialList();
-
         // Отправляем событие, чтобы другие части приложения обновили свои списки
         window.dispatchEvent(new CustomEvent('assortmentUpdated'));
+    });
+
+    addMaterialBtn.addEventListener('click', () => {
+        editingMaterialId = null;
+        resetFormState(); // Сбрасываем все, включая ID
+        submitButton.textContent = 'Добавить';
+        FormModal.show({ // eslint-disable-line
+            title: 'Добавить материал',
+            formId: 'add-material-form'
+        });
     });
 
     // Обработчик для кнопки "Отмена"
@@ -133,14 +188,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обработчик для удаления материала
     if (materialListContainer) {
         materialListContainer.addEventListener('click', (e) => {
-            const itemDiv = e.target.closest('.list-item');
+            const itemDiv = e.target.closest('.list-item'); // Для кнопок редактирования/удаления
             if (!itemDiv) return;
 
             const materialId = itemDiv.dataset.id;
 
             // Обработка нажатия на кнопку "Удалить"
             if (e.target.classList.contains('btn-delete-material')) {
-                ConfirmationModal.show({
+                ConfirmationModal.show({ // eslint-disable-line
                     title: 'Удалить материал?',
                     message: 'Вы уверены, что хотите удалить этот материал со склада?',
                     onConfirm: () => {
@@ -166,15 +221,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Переключаем форму в режим редактирования
                     editingMaterialId = materialId;
                     submitButton.textContent = 'Сохранить';
-                    cancelButton.style.display = 'inline-block';
-
-                    // Плавно прокручиваем контейнер вверх к форме,
-                    // чтобы избежать "подпрыгивания" всей страницы.
-                    const contentSection = form.closest('.content-section');
-                    if (contentSection) {
-                        contentSection.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
+                    FormModal.show({ // eslint-disable-line
+                        title: 'Редактировать материал',
+                        formId: 'add-material-form'
+                    });
                 }
+            }
+        });
+
+        // Обработчик для аккордеона
+        materialListContainer.addEventListener('click', (e) => {
+            const header = e.target.closest('.material-group-header');
+            if (header) {
+                header.classList.toggle('active');
+                header.nextElementSibling.style.display = header.classList.contains('active') ? 'block' : 'none';
             }
         });
     }

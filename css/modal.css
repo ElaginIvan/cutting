@@ -50,19 +50,6 @@
     line-height: 1.6;
 }
 
-/* Стили для форм внутри модального окна */
-.modal-body .form-group {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 15px;
-}
-
-.modal-body .form-group label {
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--text-muted-color);
-}
-
 .modal-footer {
     display: flex;
     justify-content: flex-end;

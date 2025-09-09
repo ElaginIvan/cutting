@@ -16,7 +16,7 @@
 /* Заголовок секции аккордеона */
 .accordion-header {
     background-color: var(--surface-color);
-    padding: 1rem;
+    padding: 10px 1rem; /* Уменьшаем вертикальные отступы */
     cursor: pointer;
     display: flex;
     justify-content: space-between;

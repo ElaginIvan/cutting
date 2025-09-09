@@ -110,8 +110,8 @@ const CuttingRenderer = (() => {
         }
 
         const headerText = count > 1
-            ? `Типовой раскрой (x${count} шт.) - Хлыст ${bar.originalLength} мм`
-            : `Раскрой хлыста - Длина ${bar.originalLength} мм`;
+            ? `Типовой раскрой (x${count} шт.)<br><small style="color: var(--text-muted-color); font-weight: normal;">Хлыст ${bar.originalLength} мм</small>`
+            : `Раскрой хлыста <br><small style="color: var(--text-muted-color); font-weight: normal;">Длина ${bar.originalLength} мм</small>`;
 
         html += `<div class="bar-header"><h5>${headerText}</h5><div class="header-actions">${groupActionsHTML}</div></div>`;
         html += renderBarVisualization(bar, kerf, barIdForViz);
@@ -152,6 +152,10 @@ const CuttingRenderer = (() => {
         // eslint-disable-next-line
         const { cutPlan, unplacedParts, ungroupedSignatures, isEditable } = planState;
         const [category, type] = groupKey.split('|');
+        
+        const settings = DB.getSettings(); // eslint-disable-line
+        const stats = CuttingTools.calculateStats(cutPlan, planState.kerf, settings.minRemnantSize); // eslint-disable-line
+        const kpiDisplay = stats.kpi > 0 ? `<span class="kpi-display">(КИМ: ${stats.kpi.toFixed(2)}%)</span>` : '';
 
         let card = resultsContainer.querySelector(`[data-group-key="${groupKey}"]`);
         if (!card) {
@@ -160,35 +164,50 @@ const CuttingRenderer = (() => {
             card.dataset.groupKey = groupKey;
             resultsContainer.appendChild(card);
         }
-
-        const editOrFinishButtonHTML = !isEditable
-            ? `<button class="btn-icon btn-edit-plan" title="Редактировать"><i class="fa-solid fa-pen"></i></button>`
-            : `<button class="btn-icon success btn-finish-edit" title="Завершить"><i class="fa-solid fa-check"></i></button>`;
+        
+        // Запоминаем, была ли карточка развернута до перерисовки
+        const wasActive = card.querySelector('.cutting-plan-header')?.classList.contains('active');
+        const wasDisplayed = card.querySelector('.cutting-plan-content')?.style.display === 'block';
+        // Если карточка была развернута пользователем вручную, а не по умолчанию (из-за неразмещенных деталей),
+        // то это состояние нужно сохранить.
+        const userToggled = wasActive && wasDisplayed;
 
         const undoDisabled = !isEditable || planState.historyIndex <= 0 ? 'disabled' : '';
         const redoDisabled = !isEditable || planState.historyIndex >= planState.history.length - 1 ? 'disabled' : '';
 
         const actionsHTML = isEditable
-            ? `
-                 <button class="btn-icon primary btn-undo ${undoDisabled}" title="Отменить"><i class="fa-solid fa-rotate-left"></i></button>
-                 <button class="btn-icon primary btn-redo ${redoDisabled}" title="Вернуть"><i class="fa-solid fa-rotate-right"></i></button>
-                 <button class="btn-icon primary btn-add-bar" title="Добавить хлыст"><i class="fa-solid fa-plus"></i></button>
-                 <button class="btn-icon danger btn-clear-plan" title="Очистить план"><i class="fa-solid fa-trash"></i></button>
-                 <button class="btn-icon btn-regroup" title="Сгруппировать одинаковые"><i class="fa-solid fa-object-group"></i></button>
-               `
+            ? `<div style="display: flex; justify-content: flex-end; gap: 10px; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); flex-wrap: wrap;">
+                <button class="btn-icon primary btn-undo ${undoDisabled}" title="Отменить"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="btn-icon primary btn-redo ${redoDisabled}" title="Вернуть"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="btn-icon primary btn-add-bar" title="Добавить хлыст"><i class="fa-solid fa-plus"></i></button>
+                <button class="btn-icon danger btn-clear-plan" title="Очистить план"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn-icon btn-regroup" title="Сгруппировать одинаковые"><i class="fa-solid fa-object-group"></i></button>
+                <button class="btn-icon success btn-finish-edit" title="Завершить"><i class="fa-solid fa-check"></i></button>
+            </div>`
             : '';
 
+        const hasUnplaced = unplacedParts.length > 0;
+        const headerActiveClass = hasUnplaced || userToggled ? 'active' : '';
+
         let cardHTML = `
-            <div class="cutting-plan-header">
-                <span class="material-type">${category} ${type}</span>
-                <div class="header-actions">
-                    ${actionsHTML}
-                    ${editOrFinishButtonHTML}
+            <div class="cutting-plan-header ${headerActiveClass}">
+                <div>
+                    <span class="material-type">${category} ${type}</span>
+                    ${kpiDisplay}
                 </div>
             </div>`;
 
+        let contentHTML = '';
+        if (isEditable) {
+            contentHTML += actionsHTML;
+        } else {
+            contentHTML += `<div class="cutting-main-card-actions">
+                                <button class="btn-icon btn-edit-plan" title="Редактировать"><i class="fa-solid fa-pen"></i></button>
+                            </div>`;
+        }
+
         if (cutPlan.length === 0 && unplacedParts.length > 0) {
-            cardHTML += '<p>Ни одну заготовку не удалось разместить на имеющихся материалах.</p>';
+            contentHTML += '<p>Ни одну заготовку не удалось разместить на имеющихся материалах.</p>';
         }
 
         const groupedPlans = {};
@@ -204,27 +223,27 @@ const CuttingRenderer = (() => {
 
         Object.values(groupedPlans).sort((a, b) => b.count - a.count).forEach(group => {
             if (isEditable && (group.count === 1 || ungroupedSignatures.includes(group.signature))) {
-                group.bars.sort((a, b) => a.barId.localeCompare(b.barId)).forEach(bar => cardHTML += renderEditableBar(bar, groupKey, planState, selectedItem));
+                group.bars.sort((a, b) => a.barId.localeCompare(b.barId)).forEach(bar => contentHTML += renderEditableBar(bar, groupKey, planState, selectedItem));
             } else {
-                cardHTML += renderGroupedBar(group, groupKey, planState, selectedItem);
+                contentHTML += renderGroupedBar(group, groupKey, planState, selectedItem);
             }
         });
 
         if (unplacedParts.length > 0) {
-            cardHTML += `<h5>Неразмещенные заготовки:</h5><ul class="unplaced-parts-list">`;
+            contentHTML += `<h5>Неразмещенные заготовки:</h5><ul class="unplaced-parts-list">`;
             const unplacedSummary = unplacedParts.reduce((acc, part) => {
                 acc[part.length] = (acc[part.length] || 0) + 1;
                 return acc;
             }, {});
             for (const length in unplacedSummary) {
-                cardHTML += `<li class="unplaced-part-item" data-length="${length}" title="Нажмите, чтобы добавить на выбранный хлыст">${length} мм x ${unplacedSummary[length]} шт.</li>`;
+                contentHTML += `<li class="unplaced-part-item" data-length="${length}" title="Нажмите, чтобы добавить на выбранный хлыст">${length} мм x ${unplacedSummary[length]} шт.</li>`;
             }
-            cardHTML += `</ul>`;
+            contentHTML += `</ul>`;
         }
 
         // Добавляем информацию о дефиците прямо в карточку раскроя
         if (unplacedParts.length > 0) {
-            const settings = DB.getSettings(); // eslint-disable-line
+            // const settings = DB.getSettings(); // eslint-disable-line - уже получены выше
             const deficitLengths = String(settings.deficitCalcLength).split(',').map(s => parseInt(s.trim(), 10)).filter(n => n > 0);
             const { kerf } = planState;
 
@@ -232,7 +251,7 @@ const CuttingRenderer = (() => {
                 const deficitResult = calculateDeficit(unplacedParts, deficitLengths, kerf); // eslint-disable-line
 
                 if (Object.keys(deficitResult).length > 0) {
-                    cardHTML += `
+                    contentHTML += `
                         <div class="deficit-info-block">
                             <p>Для размещения оставшихся заготовок требуется:</p>
                             <ul>${Object.entries(deficitResult).map(([len, count]) => `<li><strong>${count} шт.</strong> по ${len} мм</li>`).join('')}</ul>
@@ -240,9 +259,11 @@ const CuttingRenderer = (() => {
                 }
             }
         }
-
-        card.innerHTML = cardHTML;
-    }
+        
+        const contentDisplayStyle = hasUnplaced || userToggled ? 'display: block;' : 'display: none;';
+        // Оборачиваем контент в специальный div для сворачивания
+        card.innerHTML = cardHTML + `<div class="cutting-plan-content" style="${contentDisplayStyle}">${contentHTML}</div>`;
+    }    
 
     function renderDetailsList(bar, isVisible) {
         if (bar.cuts.length === 0) return '';

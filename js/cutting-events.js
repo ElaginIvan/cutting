@@ -17,6 +17,19 @@ const CuttingEvents = (() => {
         const planState = CuttingState.getPlan(groupKey); // eslint-disable-line
         const renderFn = () => CuttingRenderer.render(groupKey, config.container); // eslint-disable-line
 
+        // --- Обработка сворачивания/разворачивания аккордеона ---
+        // Этот блок должен идти первым, чтобы обработать клик по заголовку до других действий.
+        const header = e.target.closest('.cutting-plan-header');
+        if (header && !e.target.closest('.header-actions')) {
+            e.stopPropagation();
+            const content = header.nextElementSibling;
+            if (content && content.classList.contains('cutting-plan-content')) {
+                header.classList.toggle('active');
+                content.style.display = header.classList.contains('active') ? 'block' : 'none';
+            }
+            return; // Завершаем, чтобы не выполнять другие действия
+        }
+
         if (!planState) return;
 
         // --- Обрабатываем самые конкретные клики первыми ---
