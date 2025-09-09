@@ -198,9 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalPages = pagesContentArray.length;
         const pageClass = settings.pdfOrientation === 'l' ? 'export-page landscape' : 'export-page';
         return pagesContentArray.map((content, index) => {
+            // Добавляем класс для черно-белого режима, если опция включена
+            const bwClass = settings.pdfIsBlackAndWhite ? 'bw-mode' : '';
+            const fullContainerClass = `${pageClass} ${bwClass}`;
+
             const pageNum = index + 1;
             const pageNumHtml = `<div class="export-page-number">Страница ${pageNum} из ${totalPages}</div>`;
-            return `<div class="${pageClass}">${mainTitle}${content}${pageNumHtml}</div>`;
+            return `<div class="${fullContainerClass}">${mainTitle}${content}${pageNumHtml}</div>`;
         }).join('');
     }
 
@@ -215,10 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const unplacedSummary = allUnplacedParts.reduce((acc, part) => {
                 acc[part.length] = (acc[part.length] || 0) + 1;
                 return acc;
-            }, {});
-            for (const length in unplacedSummary) {
-                summaryHtml += `<li>${length} мм x ${unplacedSummary[length]} шт.</li>`;
-            }
+            }, {});            
+            Object.keys(unplacedSummary).sort((a, b) => b - a).forEach(length => {
+                const part = allUnplacedParts.find(p => p.length == length);
+                const label = part.name ? `${part.name} (${length} мм)` : `${length} мм`;
+                summaryHtml += `<li>${label} x ${unplacedSummary[length]} шт.</li>`;
+            });
             summaryHtml += '</ul>';
         }
 
@@ -281,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const kerf = DB.getSettings().kerf || 0;
             const totalGroupLength = (group.length * group.count) + (kerf * (group.count - 1));
             const width = (totalGroupLength / bar.originalLength) * 100;
-            const fullLabel = group.count > 1 ? `${group.length}x${group.count}` : `${group.length}`;
+            const fullLabel = group.count > 1 ? `${group.name || group.length}x${group.count}` : `${group.name || group.length}`;
             // Не отображаем текст, если отрезок слишком узкий (ширина < 4% от общей длины)
             const displayLabel = width > 4 ? fullLabel : '';
             html += `<div class="export-cut-piece" style="width: ${width}%">${displayLabel}</div>`;
@@ -296,11 +302,19 @@ document.addEventListener('DOMContentLoaded', () => {
         html += '</div>';
         html += `<p class="export-bar-summary">Использовано: ${usedLength} мм, Остаток: ${bar.remnant} мм</p>`;
 
-        const detailsSummary = bar.cuts.reduce((acc, part) => { acc[part.length] = (acc[part.length] || 0) + 1; return acc; }, {});
-        const sortedLengths = Object.keys(detailsSummary).sort((a, b) => b - a);
-        if (sortedLengths.length > 0) {
+        const detailsSummary = bar.cuts.reduce((acc, part) => {
+            const key = part.name ? `${part.name}|${part.length}` : `_${part.length}`;
+            if (!acc[key]) acc[key] = { name: part.name, length: part.length, count: 0 };
+            acc[key].count++;
+            return acc;
+        }, {});
+
+        const sortedDetails = Object.values(detailsSummary).sort((a, b) => b.length - a.length);
+        if (sortedDetails.length > 0) {
             html += '<div class="export-details-list"><h4>Спецификация:</h4><ul>';
-            sortedLengths.forEach(length => { html += `<li>- ${length} мм x ${detailsSummary[length]} шт.</li>`; });
+            sortedDetails.forEach(item => {
+                const label = item.name ? `${item.name} (${item.length} мм)` : `${item.length} мм`;
+                html += `<li>- ${label} x ${item.count} шт.</li>`; });
             html += '</ul></div>';
         }
         return html;

@@ -24,10 +24,10 @@ const CuttingRenderer = (() => {
         groupedCuts.forEach((group, groupIndex) => {
             const groupTotalLength = group.length * group.count;
             const kerfsInGroup = (group.count - 1) * kerf;
-            const totalBlockLength = groupTotalLength + kerfsInGroup;
-            const groupWidth = (totalBlockLength / bar.originalLength) * 100;
+            const totalBlockLength = groupTotalLength + kerfsInGroup; // eslint-disable-line
+            const groupWidth = ((group.length + kerf) * group.count - kerf) / bar.originalLength * 100;
  
-            const fullLabel = group.count > 1 ? `${group.length}x${group.count}` : `${group.length}`;
+            const fullLabel = group.count > 1 ? `${group.name || group.length}x${group.count}` : `${group.name || group.length}`;
             const title = group.count > 1
                 ? `Группа: ${group.count} шт. по ${group.length} мм (блок ${totalBlockLength}мм). Нажмите для удаления.`
                 : `Деталь: ${group.length} мм. Нажмите для удаления.`;
@@ -35,7 +35,7 @@ const CuttingRenderer = (() => {
  
             // В режиме редактирования добавляем data-атрибуты для идентификации группы
             const dataAttrs = barId
-                ? `data-bar-id="${barId}" data-part-length="${group.length}" data-part-count="${group.count}"`
+                ? `data-bar-id="${barId}" data-part-length="${group.length}" data-part-count="${group.count}" data-part-name="${group.name || ''}"`
                 : '';
  
             // Скрываем текст, если блок слишком узкий, как в PDF
@@ -66,7 +66,8 @@ const CuttingRenderer = (() => {
     
         bar.cuts.forEach(cut => {
             const pieceWidthPx = cut.length * SCALE_FACTOR;
-            const labelHtml = `<span class="piece-label" style="font-size: 14px;">${cut.length}</span>`;
+            const label = cut.name || cut.length;
+            const labelHtml = `<span class="piece-label" style="font-size: 14px;">${label}</span>`;
             html += `<div class="cut-piece" style="width: ${pieceWidthPx}px;">${labelHtml}</div>`;
     
             // Визуализируем рез
@@ -236,7 +237,8 @@ const CuttingRenderer = (() => {
                 return acc;
             }, {});
             for (const length in unplacedSummary) {
-                contentHTML += `<li class="unplaced-part-item" data-length="${length}" title="Нажмите, чтобы добавить на выбранный хлыст">${length} мм x ${unplacedSummary[length]} шт.</li>`;
+                const part = unplacedParts.find(p => p.length == length); // Находим первую деталь с такой длиной, чтобы получить имя
+                contentHTML += `<li class="unplaced-part-item" data-length="${length}" title="Нажмите, чтобы добавить на выбранный хлыст">${part.name || length + ' мм'} x ${unplacedSummary[length]} шт.</li>`;
             }
             contentHTML += `</ul>`;
         }
@@ -269,16 +271,15 @@ const CuttingRenderer = (() => {
         if (bar.cuts.length === 0) return '';
 
         const detailsSummary = bar.cuts.reduce((acc, part) => {
-            acc[part.length] = (acc[part.length] || 0) + 1;
+            const key = part.name ? `${part.name}|${part.length}` : `_${part.length}`;
+            if (!acc[key]) acc[key] = { name: part.name, length: part.length, count: 0 };
+            acc[key].count++;
             return acc;
         }, {});
 
-        // Сортируем по убыванию длины
-        const sortedLengths = Object.keys(detailsSummary).sort((a, b) => b - a);
-
-        const listItems = sortedLengths.map(length => {
-            const count = detailsSummary[length];
-            return `<li class="detail-item" data-length="${length}" title="Подсветить на схеме">${length} мм x ${count} шт.</li>`;
+        const listItems = Object.values(detailsSummary).sort((a, b) => b.length - a.length).map(item => {
+            const label = item.name ? `${item.name} (${item.length} мм)` : `${item.length} мм`;
+            return `<li class="detail-item" data-length="${item.length}" title="Подсветить на схеме">${label} x ${item.count} шт.</li>`;
         }).join('');
 
         const visibleClass = isVisible ? 'visible' : '';

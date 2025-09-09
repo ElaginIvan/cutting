@@ -17,6 +17,7 @@ const CuttingCalculator = (() => { // eslint-disable-line
                 const newItem = {
                     length: item.length,
                     id: item.id || `part_${i}`,
+                    name: item.name || '',
                     isRemnant: type === 'stock' ? !!item.isRemnant : false
                 };
                 grouped[key][type].push(newItem);
@@ -49,7 +50,7 @@ const CuttingCalculator = (() => { // eslint-disable-line
                 return {}; // Нет заготовок для расчета
             }
 
-            const allPartsExpanded = simpleModeParts.flatMap(p => Array(p.quantity).fill({ length: p.length, id: p.id }));
+            const allPartsExpanded = simpleModeParts.flatMap(p => Array(p.quantity).fill({ length: p.length, id: p.id, name: p.name }));
             const bestPlan = CuttingTools.analyzeAndFindBestStock(allPartsExpanded, deficitLengths, kerf, minRemnantSize); // eslint-disable-line
 
             if (!bestPlan || bestPlan.cutPlan.length === 0) {

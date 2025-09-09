@@ -77,10 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return acc;
         }, {});
 
-        // 2. Отрисовываем группы
+        // 2. Сортируем и отрисовываем группы
         for (const groupKey in groupedMaterials) {
             const [category, type] = groupKey.split('|');
             const group = groupedMaterials[groupKey];
+
+            // Сортируем хлысты и остатки по длине (по возрастанию)
+            group.stock.sort((a, b) => a.length - b.length);
+            group.remnants.sort((a, b) => a.length - b.length);
 
             const groupContainer = document.createElement('div');
             groupContainer.className = 'material-group';

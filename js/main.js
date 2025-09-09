@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const materialTab = document.querySelector('.nav-item[data-tab="material"]');
     let activeIndex = 0; // Индекс активной вкладки
     let resizeTimer; // Таймер для оптимизации события resize
+    let currentMode = 'simple'; // Храним текущий режим работы
 
     /**
      * Применяет выбранную тему (светлую или темную) к документу.
@@ -75,9 +76,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const swipeThreshold = 50; // Минимальная дистанция для свайпа
         if (touchendX < touchstartX - swipeThreshold && activeIndex < navItems.length - 1) {
-            activeIndex++; // Свайп влево
+            activeIndex++; // Свайп влево (переход к следующей вкладке)
         } else if (touchendX > touchstartX + swipeThreshold && activeIndex > 0) {
-            activeIndex--; // Свайп вправо
+            const newIndex = activeIndex - 1;
+            // В простом режиме запрещаем свайп на вкладку "Материал" (индекс 0)
+            if (currentMode === 'simple' && newIndex === 0) {
+                return; // Ничего не делаем, остаемся на текущей вкладке
+            }
+            activeIndex--; // Свайп вправо (переход к предыдущей вкладке)
         }
         // Если свайп был достаточно сильным, activeIndex изменился, и мы обновляем вид
         updateView();
@@ -85,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleModeChange(mode) {
         materialTab.style.display = mode === 'simple' ? 'none' : 'flex';
+        currentMode = mode; // Обновляем состояние текущего режима
 
         // Если мы в простом режиме и активна вкладка "Материал" (которая теперь скрыта),
         // переключаемся на следующую вкладку "Заготовки".

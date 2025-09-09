@@ -157,3 +157,26 @@
     font-size: 10px;
     color: #888;
 }
+
+/* --- Стили для черно-белой печати --- */
+
+/* Когда на контейнере есть класс .bw-mode, применяем монохромные стили */
+.bw-mode h2 {
+    color: #000; /* Убираем синий цвет с заголовков */
+}
+
+.bw-mode .export-cut-piece {
+    background-color: #dcdcdc; /* Светло-серый для деталей */
+    color: #000;
+    border-right: 1px solid #888;
+}
+
+.bw-mode .export-remnant-piece {
+    background-color: #f0f0f0; /* Очень светло-серый для остатков */
+    color: #000;
+}
+
+.bw-mode .export-summary-block h3 {
+    color: #000; /* Убираем красный цвет с заголовка дефицита */
+    font-weight: bold; /* Делаем его жирным для акцента */
+}

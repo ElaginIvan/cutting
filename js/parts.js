@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assortmentFields = form.querySelector('.assortment-fields');
     const typeSelect = document.getElementById('part-material-type');
     const lengthInput = document.getElementById('part-length');
+    const nameInput = document.getElementById('part-name');
     const quantityInput = document.getElementById('part-quantity');
     const submitButton = form.querySelector('button[type="submit"]');
     const addPartBtn = document.getElementById('add-part-btn');
@@ -99,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const [category, type] = groupKey.split('|');
             const group = groupedParts[groupKey];
 
+            // Сортируем заготовки в группе по длине (по возрастанию)
+            group.sort((a, b) => a.length - b.length);
+
             const groupContainer = document.createElement('div');
             // Переиспользуем стили от группировки материалов
             groupContainer.className = 'material-group';
@@ -125,9 +129,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'list-item';
         itemDiv.dataset.id = part.id;
+        const nameDisplay = part.name ? `<strong>${part.name}</strong> (${part.length} мм)` : `<strong>${part.length} мм</strong>`;
         itemDiv.innerHTML = `
             <div class="item-info">
-                <strong>${part.length} мм</strong> x ${part.quantity} шт.
+                ${nameDisplay} x ${part.quantity} шт.
             </div>
             <div class="item-actions">
                 <button class="btn-icon btn-edit-part fa-solid fa-pen"></button>
@@ -168,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         let partData = {
             length: parseInt(lengthInput.value, 10),
+            name: nameInput.value.trim(),
             quantity: parseInt(quantityInput.value, 10)
         };
 
@@ -242,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     populateTypes(partToEdit.category); // Обновляем список типоразмеров
                     typeSelect.value = partToEdit.type;
                     lengthInput.value = partToEdit.length;
+                    nameInput.value = partToEdit.name || '';
                     quantityInput.value = partToEdit.quantity;
 
                     // Переключаем форму в режим редактирования
