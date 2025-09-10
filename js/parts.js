@@ -18,9 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isSimpleMode = false;
 
     // --- Функции для отрисовки ---
-    // Заполняем список сортамент из базы getMaterials
     function populateCategories() {
-        const assortment = DB.getAssortment();
         const settings = DB.getSettings();
         isSimpleMode = settings.workMode === 'simple';
 
@@ -33,10 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
             categorySelect.required = true;
             typeSelect.required = true;
             categorySelect.innerHTML = '<option value="" disabled selected>Выберите тип</option>';
-            assortment.forEach(item => {
+
+            // Получаем уникальные категории из существующих материалов
+            const materials = DB.getMaterials();
+            const uniqueCategories = [...new Set(materials.map(item => item.category))];
+
+            uniqueCategories.forEach(categoryName => {
                 const option = document.createElement('option');
-                option.value = item.name;
-                option.textContent = item.name;
+                option.value = categoryName;
+                option.textContent = categoryName;
                 categorySelect.appendChild(option);
             });
         }
@@ -45,18 +48,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Заполняет выпадающий список типоразмеров на основе выбранной категории
     function populateTypes(selectedCategory) {
-        const materials = DB.getMaterials();
         typeSelect.innerHTML = '<option value="" disabled selected>Выберите типоразмер</option>';
         typeSelect.disabled = true;
-
-        const assortment = DB.getAssortment();
-        const selectedAssortment = assortment.find(item => item.name === selectedCategory);
-
-        if (selectedAssortment && selectedAssortment.sizes) {
-            selectedAssortment.sizes.forEach(size => {
+ 
+        // Находим все материалы, соответствующие выбранной категории
+        const materials = DB.getMaterials();
+        const materialsInCategory = materials.filter(item => item.category === selectedCategory);
+        // Получаем из них уникальные типоразмеры
+        const uniqueTypes = [...new Set(materialsInCategory.map(item => item.type))];
+ 
+        if (uniqueTypes.length > 0) {
+            uniqueTypes.forEach(typeName => {
                 const option = document.createElement('option');
-                option.value = size;
-                option.textContent = size;
+                option.value = typeName;
+                option.textContent = typeName;
                 typeSelect.appendChild(option);
             });
             typeSelect.disabled = false;

@@ -14,7 +14,7 @@
 
 .modal-content {
     background-color: var(--surface-color);
-    padding: 20px;
+    padding: 10px;
     border-radius: 8px;
     width: 90%;
     max-width: 400px;
@@ -43,11 +43,6 @@
     font-size: 28px;
     color: var(--text-muted-color);
     cursor: pointer;
-}
-
-.modal-body {
-    margin-bottom: 20px;
-    line-height: 1.6;
 }
 
 .modal-footer {
